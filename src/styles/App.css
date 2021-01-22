@@ -1,0 +1,19 @@
+.App {
+  text-align: center;
+  margin: 5em;
+  align-items: center;
+}
+
+.score-board > div {
+  margin: 1em;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}

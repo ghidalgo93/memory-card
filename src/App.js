@@ -1,51 +1,58 @@
 import React, { useState, useEffect } from "react";
 import "./styles/App.css";
 import Scoreboard from "./components/Scoreboard";
-import uniqid from "uniqid";
-import { shuffle } from "./helpers";
+import { shuffle, randomColor } from "./helpers";
+import gameCards from "./gameCards";
 
 const App = () => {
   const [numberOfCards, setNumberOfCards] = useState(3);
   const [highScore, setHighScore] = useState(0);
   const [currentScore, setCurrentScore] = useState(0);
   const [shownCards, setShownCards] = useState([]);
-  const [selectedCards, setSelectedCards] = useState([]);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [gameover, setGameover] = useState(false);
-  const gameCards = [
-    { name: 1, id: uniqid() },
-    { name: 2, id: uniqid() },
-    { name: 3, id: uniqid() },
-    { name: 4, id: uniqid() },
-    { name: 5, id: uniqid() },
-  ];
 
   const fetchRandomCards = (cards, numCards) => {
     const randomCards = shuffle(cards).slice(0, numCards);
     setShownCards(randomCards);
   };
 
+  useEffect(() => {
+    fetchRandomCards(gameCards, numberOfCards);
+  }, [selectedIds, numberOfCards]);
+
   const cardSelectHandler = (e) => {
-    const cardId = e.target.id;
-    // if the clicked card is in the selected card list
-    // set game over to true
-    // else
-    // setSelectedCards[..selectedCards, current card]
-    // up current score
-    // if current score >= highScore
-    // set highscore to current score
-    // fetchRandomCards
+    const selectedId = e.target.id;
+    if (selectedIds.includes(selectedId)) {
+      setGameover(true);
+    } else {
+      setSelectedIds([...selectedIds, selectedId]);
+      setCurrentScore(currentScore + 1);
+    }
   };
 
   useEffect(() => {
-    fetchRandomCards(gameCards, numberOfCards);
-  }, []);
+    if (currentScore > highScore) setHighScore(currentScore);
+  }, [currentScore, highScore]);
+
+  const resetHandler = () => {
+    setCurrentScore(0);
+    setSelectedIds([0]);
+    setGameover(false);
+  };
 
   let content = (
     <div className={"column App"}>
+      <h1>Memory Dawg</h1>
       <Scoreboard currentScore={currentScore} highScore={highScore} />
       <div>
         {shownCards.map((card) => (
-          <button onClick={cardSelectHandler} id={card.id} key={card.id}>
+          <button
+            onClick={cardSelectHandler}
+            id={card.id}
+            key={card.id}
+            style={{ backgroundColor: `#${randomColor()}` }}
+          >
             {card.name}
           </button>
         ))}
@@ -54,7 +61,12 @@ const App = () => {
   );
 
   if (gameover) {
-    content = <h1>Game Over</h1>;
+    content = (
+      <div className={"App"}>
+        <h1>Game Over</h1>
+        <button onClick={resetHandler}>restart</button>
+      </div>
+    );
   }
 
   return content;
